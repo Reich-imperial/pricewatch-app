@@ -1,0 +1,13 @@
+services:
+  elasticmq:
+    image: softwaremill/elasticmq-native:1.7.1
+    ports: ["9324:9324"]
+    volumes: ["./elasticmq.conf:/opt/elasticmq.conf:ro"]
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: pricewatch
+      POSTGRES_PASSWORD: pricewatch_dev
+      POSTGRES_DB: pricewatch
+    ports: ["5432:5432"]
+    volumes: ["./init.sql:/docker-entrypoint-initdb.d/init.sql:ro"]
