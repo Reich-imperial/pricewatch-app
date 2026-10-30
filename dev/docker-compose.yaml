@@ -26,3 +26,4 @@ services:
     build: {context: .., dockerfile: Dockerfile.worker}
     environment: *appenv
     depends_on: [elasticmq, postgres]
+    ports: ["9100:9100"]

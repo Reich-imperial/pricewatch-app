@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from common.models import QueuedPriceUpdate
 from common.queue_adapter import QueueAdapter
+from prometheus_client import Counter, start_http_server
 
 logging.basicConfig(level=logging.INFO, format='{"time":"%(asctime)s","level":"%(levelname)s","msg":"%(message)s"}')
 
@@ -24,6 +25,8 @@ INSERT_SQL = """INSERT INTO price_events
   RETURNING event_id"""
 
 running = True
+EVENTS = Counter("pricewatch_events_total", "Messages handled by the worker",["result"])
+
 
 
 def request_stop(signum, frame):
@@ -48,6 +51,7 @@ def process(conn, body):
 
 
 def main():
+    start_http_server(9100)
     signal.signal(signal.SIGTERM, request_stop)
     signal.signal(signal.SIGINT, request_stop)
     queue = QueueAdapter(read_timeout=15)
@@ -60,10 +64,13 @@ def main():
                 outcome, event_id = process(conn, msg["Body"])  # the commit happens inside process()
                 queue.delete(msg["ReceiptHandle"])              # only AFTER the commit
                 logging.info("%s event_id=%s", outcome, event_id)
+                EVENTS.labels(outcome).inc()
         except ValidationError as e:
             logging.warning("invalid message left on queue: %s", e.errors()[0]["msg"])  # not deleted
+            EVENTS.labels("invalid").inc()
         except Exception:
             logging.exception("processing failed, message left on queue, backing off")
+            EVENTS.labels("error").inc()
             time.sleep(BACKOFF_S)
 
 
