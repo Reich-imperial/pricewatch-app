@@ -10,4 +10,19 @@ services:
       POSTGRES_PASSWORD: pricewatch_dev
       POSTGRES_DB: pricewatch
     ports: ["5432:5432"]
-    volumes: ["./init.sql:/docker-entrypoint-initdb.d/init.sql:ro"]
+    volumes: ["./init.sql:/docker-entrypoint-initdb.d/init.sql:ro"]    
+  api:
+    build: {context: .., dockerfile: Dockerfile.api}
+    ports: ["8000:8000"]
+    environment: &appenv
+      AWS_ACCESS_KEY_ID: x
+      AWS_SECRET_ACCESS_KEY: x
+      AWS_REGION: elasticmq
+      QUEUE_URL: http://elasticmq:9324/000000000000/prices
+      SQS_ENDPOINT_URL: http://elasticmq:9324
+      DATABASE_URL: postgresql://pricewatch:pricewatch_dev@postgres:5432/pricewatch
+    depends_on: [elasticmq, postgres]
+  worker:
+    build: {context: .., dockerfile: Dockerfile.worker}
+    environment: *appenv
+    depends_on: [elasticmq, postgres]

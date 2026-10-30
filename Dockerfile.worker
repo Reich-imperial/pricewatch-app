@@ -1,0 +1,10 @@
+FROM python:3.12-slim
+ENV PYTHONUNBUFFERED=1
+RUN useradd --uid 10001 --no-create-home app
+WORKDIR /app
+COPY requirements-worker.txt .
+RUN pip install --no-cache-dir -r requirements-worker.txt
+COPY common ./common
+COPY worker ./worker 
+USER 10001
+CMD ["python", "-m", "worker.main"]
