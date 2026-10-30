@@ -27,3 +27,9 @@ services:
     environment: *appenv
     depends_on: [elasticmq, postgres]
     ports: ["9100:9100"]
+
+  prometheus:
+    image: prom/prometheus:v3.11.2
+    volumes: ["./prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["9090:9090"]
+    depends_on: [worker]
