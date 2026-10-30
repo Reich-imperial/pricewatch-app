@@ -24,7 +24,9 @@ services:
     depends_on: [elasticmq, postgres]
   worker:
     build: {context: .., dockerfile: Dockerfile.worker}
-    environment: *appenv
+    environment:
+      <<: *appenv
+      PROCESSING_DELAY_MS: "${PROCESSING_DELAY_MS:-0}"
     depends_on: [elasticmq, postgres]
     ports: ["9100:9100"]
 
