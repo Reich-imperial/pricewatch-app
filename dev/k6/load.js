@@ -34,7 +34,7 @@ export default function () {
     symbol: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
     price_ngn: 80000 + Math.floor(Math.random() * 20000),
     observed_at: new Date().toISOString(),
-    source: 'k6',
+    source: `k6-${__ENV.RUN_ID}`,
   });
   const res = http.post(`${__ENV.BASE_URL}/v1/prices`, body, {
     headers: { 'Content-Type': 'application/json' },
