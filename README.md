@@ -9,6 +9,7 @@ It is built in small, tested steps. This README only claims what has been run an
 ---
 
 ## Architecture
+![PriceWatch architecture](docs/architecture.png)
 
 ```mermaid
 flowchart LR
